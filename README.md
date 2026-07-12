@@ -21,9 +21,11 @@ cloudshop-enterprise/
 │   │   └── cors_options/    # OPTIONS + mock integration para CORS
 │   ├── provider.tf, variables.tf, locals.tf, outputs.tf
 │   ├── dynamodb.tf, iam.tf, lambda.tf, api_gateway.tf, eventbridge.tf, ses.tf
-│   ├── s3_frontend.tf, cloudfront.tf, waf.tf, cloudwatch.tf
+│   ├── s3_frontend.tf, cloudfront.tf, waf.tf, cloudwatch.tf, cognito.tf
 │   └── terraform.tfvars.example
-└── docs/                 # documento técnico (pendiente)
+├── frontend/              # React 18 + Vite 5 + Cognito (SRP) — listo
+│   └── src/{auth,services,components,pages}
+└── docs/                 # documento técnico (entregado aparte, no versionado)
 ```
 
 ## Estado actual
@@ -39,9 +41,11 @@ cloudshop-enterprise/
 - [x] CloudFront + WAF + S3 frontend (OAC, fallback SPA, managed rules + rate limit)
 - [x] SES + consumer de notificaciones
 - [x] CloudWatch (alarmas por Lambda/API Gateway + SNS + dashboard operativo)
-- [ ] Documento técnico completo
+- [x] Cognito User Pool + App Client propios (`infra/terraform/cognito.tf`, atributo `custom:role`)
+- [x] Frontend (React 18 + Vite 5, login/signup/confirm con Cognito SRP, páginas por módulo con control de UI por rol)
+- [ ] Documento técnico completo (se entrega aparte, no se sube al repo)
 
-## Cómo desplegar (una vez completo)
+## Cómo desplegar
 
 ```bash
 cd infra/terraform
@@ -51,14 +55,10 @@ terraform plan
 terraform apply
 ```
 
-Requiere un Cognito User Pool existente (ARN en `cognito_user_pool_arn`) con un atributo custom `custom:role` (`Administrador` | `Operador` | `Cliente`) — el mismo patrón de autorización visto en Clase 16/29.
+El propio Terraform crea el Cognito User Pool (ya no hace falta uno externo). Después del apply:
 
-## Convención de roles (IAM de la aplicación, vía Cognito)
-
-| Rol | Puede |
-|---|---|
-| Administrador | gestionar usuarios, tiendas, productos, ver reportes |
-| Operador | gestionar inventario, gestionar pedidos |
-| Cliente | comprar productos, ver sus propios pedidos |
-
-Cada Lambda valida rol con `common.auth.require_roles(...)` antes de tocar datos — nunca se confía solo en el frontend (mismo principio de Clase 28).
+```bash
+cd ../../frontend
+cp .env.production.example .env.production
+# rellenar con:
+#   terraform -chdir=../infra/terraform output api
