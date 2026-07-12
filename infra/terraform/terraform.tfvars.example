@@ -1,6 +1,8 @@
-aws_region            = "us-east-1"
-project_name          = "cloudshop"
-environment           = "dev"
-cognito_user_pool_arn = "arn:aws:cognito-idp:us-east-1:123456789012:userpool/us-east-1_XXXXXXX"
-ses_sender_email      = "notificaciones@tudominio.com"
-alert_email           = "tu-correo@ejemplo.com"
+aws_region       = "us-east-1"
+project_name     = "cloudshop"
+environment      = "dev"
+ses_sender_email = "notificaciones@tudominio.com"
+alert_email      = "tu-correo@ejemplo.com"
+
+# El User Pool de Cognito lo crea este mismo Terraform (infra/terraform/cognito.tf).
+# No hace falta ninguna variable pa
