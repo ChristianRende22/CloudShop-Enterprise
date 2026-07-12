@@ -89,6 +89,9 @@ locals {
     pedidos_cancelar = {
       handler = "pedidos.handler.cancelar"
     }
+    dashboard_resumen = {
+      handler = "dashboard.handler.resumen"
+    }
   }
 }
 

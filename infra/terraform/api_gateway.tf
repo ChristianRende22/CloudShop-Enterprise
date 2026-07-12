@@ -439,6 +439,31 @@ module "pedidos_id_cors" {
   resource_id = aws_api_gateway_resource.pedidos_id.id
 }
 
+# --- Recurso /dashboard (solo lectura, exclusivo Administrador via IAM/rol app) ---
+
+resource "aws_api_gateway_resource" "dashboard" {
+  rest_api_id = aws_api_gateway_rest_api.cloudshop.id
+  parent_id   = aws_api_gateway_rest_api.cloudshop.root_resource_id
+  path_part   = "dashboard"
+}
+
+module "dashboard_get" {
+  source                = "./modules/api_method"
+  rest_api_id            = aws_api_gateway_rest_api.cloudshop.id
+  resource_id            = aws_api_gateway_resource.dashboard.id
+  http_method            = "GET"
+  authorizer_id          = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn      = aws_lambda_function.this["dashboard_resumen"].invoke_arn
+  lambda_function_name   = aws_lambda_function.this["dashboard_resumen"].function_name
+  api_execution_arn      = aws_api_gateway_rest_api.cloudshop.execution_arn
+}
+
+module "dashboard_cors" {
+  source      = "./modules/cors_options"
+  rest_api_id = aws_api_gateway_rest_api.cloudshop.id
+  resource_id = aws_api_gateway_resource.dashboard.id
+}
+
 # --- Deployment + Stage ---
 # El trigger fuerza un nuevo deployment cada vez que cambia algun metodo o
 # recurso; sin esto Terraform no vuelve a desplegar la API en cada apply.
@@ -487,6 +512,9 @@ resource "aws_api_gateway_deployment" "cloudshop" {
       module.pedidos_patch.method_id,
       module.pedidos_delete.method_id,
       module.pedidos_cors.rest_api_id,
+      aws_api_gateway_resource.dashboard.id,
+      module.dashboard_get.method_id,
+      module.dashboard_cors.rest_api_id,
     ]))
   }
 
