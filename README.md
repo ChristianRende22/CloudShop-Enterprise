@@ -11,7 +11,7 @@ cloudshop-enterprise/
 │   ├── usuarios/        # Módulo 1
 │   ├── productos/       # Módulo 2 (listo)
 │   ├── tiendas/         # Módulo 3 (listo)
-│   ├── carrito/         # Módulo 4 (pendiente)
+│   ├── carrito/         # Módulo 4 (listo)
 │   ├── pedidos/         # Módulo 5 (pendiente)
 │   ├── notificaciones/  # consumer de eventos -> SES (pendiente)
 │   └── dashboard/       # Módulo 6 (pendiente)
@@ -32,7 +32,8 @@ cloudshop-enterprise/
 - [x] Terraform base: provider, IAM (mínimo privilegio), DynamoDB usuarios/auditoría, API Gateway + Cognito Authorizer, Lambdas de usuarios, EventBridge bus
 - [x] Módulo 2 — Productos (CRUD + roles + auditoría + GSI tienda_id)
 - [x] Módulo 3 — Tiendas (CRUD + borrado lógico + roles)
-- [ ] Módulos 4-6 (Carrito, Pedidos+SES, Dashboard)
+- [x] Módulo 4 — Carrito (agregar/modificar/eliminar/vaciar, propio del usuario)
+- [ ] Módulos 5-6 (Pedidos+SES, Dashboard)
 - [ ] CloudFront + WAF + S3 frontend
 - [ ] SES + consumer de notificaciones
 - [ ] CloudWatch alarms

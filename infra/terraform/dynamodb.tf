@@ -79,5 +79,28 @@ resource "aws_dynamodb_table" "tiendas" {
   tags = local.common_tags
 }
 
-# NOTA: las tablas de Carrito y Pedidos se agregan en este mismo archivo
-# cuando se implementen esos modulos (ver README para el estado actual).
+# Modulo 4 - Carrito de Compras
+# PK usuario_id + SK producto_id: cada producto en el carrito es un item
+# independiente (permite upsert de cantidad, borrado individual y vaciado
+# via Query + BatchWrite sin tocar los demas items de otros usuarios).
+resource "aws_dynamodb_table" "carrito" {
+  name         = "${local.name_prefix}-carrito"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "usuario_id"
+  range_key    = "producto_id"
+
+  attribute {
+    name = "usuario_id"
+    type = "S"
+  }
+
+  attribute {
+    name = "producto_id"
+    type = "S"
+  }
+
+  tags = local.common_tags
+}
+
+# NOTA: la tabla de Pedidos se agrega en este mismo archivo cuando se
+# implemente ese modulo (ver README para el estado actual).

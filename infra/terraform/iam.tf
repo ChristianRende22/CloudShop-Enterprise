@@ -41,6 +41,7 @@ data "aws_iam_policy_document" "lambda_dynamodb" {
       aws_dynamodb_table.productos.arn,
       "${aws_dynamodb_table.productos.arn}/index/*",
       aws_dynamodb_table.tiendas.arn,
+      aws_dynamodb_table.carrito.arn,
     ]
   }
 }

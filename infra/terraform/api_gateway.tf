@@ -270,6 +270,91 @@ module "tiendas_id_cors" {
   resource_id = aws_api_gateway_resource.tiendas_id.id
 }
 
+# --- Recursos /carrito y /carrito/{id} ---
+# El carrito es siempre "el mio" (usuario_id sale del token), por eso no hay
+# id de usuario en la ruta. {id} aqui es el producto_id dentro del carrito.
+
+resource "aws_api_gateway_resource" "carrito" {
+  rest_api_id = aws_api_gateway_rest_api.cloudshop.id
+  parent_id   = aws_api_gateway_rest_api.cloudshop.root_resource_id
+  path_part   = "carrito"
+}
+
+resource "aws_api_gateway_resource" "carrito_id" {
+  rest_api_id = aws_api_gateway_rest_api.cloudshop.id
+  parent_id   = aws_api_gateway_resource.carrito.id
+  path_part   = "{id}"
+}
+
+module "carrito_post" {
+  source                = "./modules/api_method"
+  rest_api_id            = aws_api_gateway_rest_api.cloudshop.id
+  resource_id            = aws_api_gateway_resource.carrito.id
+  http_method            = "POST"
+  authorizer_id          = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn      = aws_lambda_function.this["carrito_agregar"].invoke_arn
+  lambda_function_name   = aws_lambda_function.this["carrito_agregar"].function_name
+  api_execution_arn      = aws_api_gateway_rest_api.cloudshop.execution_arn
+}
+
+module "carrito_get_all" {
+  source                = "./modules/api_method"
+  rest_api_id            = aws_api_gateway_rest_api.cloudshop.id
+  resource_id            = aws_api_gateway_resource.carrito.id
+  http_method            = "GET"
+  authorizer_id          = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn      = aws_lambda_function.this["carrito_listar"].invoke_arn
+  lambda_function_name   = aws_lambda_function.this["carrito_listar"].function_name
+  api_execution_arn      = aws_api_gateway_rest_api.cloudshop.execution_arn
+}
+
+module "carrito_delete_all" {
+  source                = "./modules/api_method"
+  rest_api_id            = aws_api_gateway_rest_api.cloudshop.id
+  resource_id            = aws_api_gateway_resource.carrito.id
+  http_method            = "DELETE"
+  authorizer_id          = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn      = aws_lambda_function.this["carrito_vaciar"].invoke_arn
+  lambda_function_name   = aws_lambda_function.this["carrito_vaciar"].function_name
+  api_execution_arn      = aws_api_gateway_rest_api.cloudshop.execution_arn
+}
+
+module "carrito_patch" {
+  source              = "./modules/api_method"
+  rest_api_id          = aws_api_gateway_rest_api.cloudshop.id
+  resource_id          = aws_api_gateway_resource.carrito_id.id
+  http_method          = "PATCH"
+  authorizer_id        = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn    = aws_lambda_function.this["carrito_modificar"].invoke_arn
+  lambda_function_name = aws_lambda_function.this["carrito_modificar"].function_name
+  api_execution_arn    = aws_api_gateway_rest_api.cloudshop.execution_arn
+  request_parameters   = { "method.request.path.id" = true }
+}
+
+module "carrito_delete_one" {
+  source              = "./modules/api_method"
+  rest_api_id          = aws_api_gateway_rest_api.cloudshop.id
+  resource_id          = aws_api_gateway_resource.carrito_id.id
+  http_method          = "DELETE"
+  authorizer_id        = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn    = aws_lambda_function.this["carrito_eliminar"].invoke_arn
+  lambda_function_name = aws_lambda_function.this["carrito_eliminar"].function_name
+  api_execution_arn    = aws_api_gateway_rest_api.cloudshop.execution_arn
+  request_parameters   = { "method.request.path.id" = true }
+}
+
+module "carrito_cors" {
+  source      = "./modules/cors_options"
+  rest_api_id = aws_api_gateway_rest_api.cloudshop.id
+  resource_id = aws_api_gateway_resource.carrito.id
+}
+
+module "carrito_id_cors" {
+  source      = "./modules/cors_options"
+  rest_api_id = aws_api_gateway_rest_api.cloudshop.id
+  resource_id = aws_api_gateway_resource.carrito_id.id
+}
+
 # --- Deployment + Stage ---
 # El trigger fuerza un nuevo deployment cada vez que cambia algun metodo o
 # recurso; sin esto Terraform no vuelve a desplegar la API en cada apply.
@@ -302,6 +387,14 @@ resource "aws_api_gateway_deployment" "cloudshop" {
       module.tiendas_patch.method_id,
       module.tiendas_delete.method_id,
       module.tiendas_cors.rest_api_id,
+      aws_api_gateway_resource.carrito.id,
+      aws_api_gateway_resource.carrito_id.id,
+      module.carrito_post.method_id,
+      module.carrito_get_all.method_id,
+      module.carrito_delete_all.method_id,
+      module.carrito_patch.method_id,
+      module.carrito_delete_one.method_id,
+      module.carrito_cors.rest_api_id,
     ]))
   }
 

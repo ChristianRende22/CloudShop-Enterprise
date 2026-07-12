@@ -59,6 +59,21 @@ locals {
     tiendas_desactivar = {
       handler = "tiendas.handler.desactivar"
     }
+    carrito_agregar = {
+      handler = "carrito.handler.agregar"
+    }
+    carrito_listar = {
+      handler = "carrito.handler.listar"
+    }
+    carrito_modificar = {
+      handler = "carrito.handler.modificar"
+    }
+    carrito_eliminar = {
+      handler = "carrito.handler.eliminar"
+    }
+    carrito_vaciar = {
+      handler = "carrito.handler.vaciar"
+    }
   }
 }
 
@@ -79,6 +94,7 @@ resource "aws_lambda_function" "this" {
       USUARIOS_TABLE  = aws_dynamodb_table.usuarios.name
       PRODUCTOS_TABLE = aws_dynamodb_table.productos.name
       TIENDAS_TABLE   = aws_dynamodb_table.tiendas.name
+      CARRITO_TABLE   = aws_dynamodb_table.carrito.name
       AUDIT_TABLE     = aws_dynamodb_table.auditoria.name
       EVENT_BUS_NAME  = aws_cloudwatch_event_bus.cloudshop.name
       ROLE_CLAIM_KEY  = "custom:role"
