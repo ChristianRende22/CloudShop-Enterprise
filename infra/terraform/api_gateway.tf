@@ -1,0 +1,261 @@
+resource "aws_api_gateway_rest_api" "cloudshop" {
+  name = "${local.name_prefix}-api"
+
+  endpoint_configuration {
+    types = ["REGIONAL"]
+  }
+
+  tags = local.common_tags
+}
+
+# Autoriza cada request validando el JWT de Cognito ANTES de invocar Lambda
+# (Clase 16: ahorra computo y protege el backend desde el borde).
+resource "aws_api_gateway_authorizer" "cognito" {
+  name            = "${local.name_prefix}-cognito-authorizer"
+  rest_api_id     = aws_api_gateway_rest_api.cloudshop.id
+  type            = "COGNITO_USER_POOLS"
+  provider_arns   = [var.cognito_user_pool_arn]
+  identity_source = "method.request.header.Authorization"
+}
+
+# --- Recursos /usuarios y /usuarios/{id} ---
+
+resource "aws_api_gateway_resource" "usuarios" {
+  rest_api_id = aws_api_gateway_rest_api.cloudshop.id
+  parent_id   = aws_api_gateway_rest_api.cloudshop.root_resource_id
+  path_part   = "usuarios"
+}
+
+resource "aws_api_gateway_resource" "usuarios_id" {
+  rest_api_id = aws_api_gateway_rest_api.cloudshop.id
+  parent_id   = aws_api_gateway_resource.usuarios.id
+  path_part   = "{id}"
+}
+
+module "usuarios_post" {
+  source                = "./modules/api_method"
+  rest_api_id            = aws_api_gateway_rest_api.cloudshop.id
+  resource_id            = aws_api_gateway_resource.usuarios.id
+  http_method            = "POST"
+  authorizer_id          = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn      = aws_lambda_function.this["usuarios_crear"].invoke_arn
+  lambda_function_name   = aws_lambda_function.this["usuarios_crear"].function_name
+  api_execution_arn      = aws_api_gateway_rest_api.cloudshop.execution_arn
+}
+
+module "usuarios_get_all" {
+  source                = "./modules/api_method"
+  rest_api_id            = aws_api_gateway_rest_api.cloudshop.id
+  resource_id            = aws_api_gateway_resource.usuarios.id
+  http_method            = "GET"
+  authorizer_id          = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn      = aws_lambda_function.this["usuarios_listar"].invoke_arn
+  lambda_function_name   = aws_lambda_function.this["usuarios_listar"].function_name
+  api_execution_arn      = aws_api_gateway_rest_api.cloudshop.execution_arn
+}
+
+module "usuarios_get_one" {
+  source              = "./modules/api_method"
+  rest_api_id          = aws_api_gateway_rest_api.cloudshop.id
+  resource_id          = aws_api_gateway_resource.usuarios_id.id
+  http_method          = "GET"
+  authorizer_id        = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn    = aws_lambda_function.this["usuarios_obtener"].invoke_arn
+  lambda_function_name = aws_lambda_function.this["usuarios_obtener"].function_name
+  api_execution_arn    = aws_api_gateway_rest_api.cloudshop.execution_arn
+  request_parameters   = { "method.request.path.id" = true }
+}
+
+module "usuarios_patch" {
+  source              = "./modules/api_method"
+  rest_api_id          = aws_api_gateway_rest_api.cloudshop.id
+  resource_id          = aws_api_gateway_resource.usuarios_id.id
+  http_method          = "PATCH"
+  authorizer_id        = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn    = aws_lambda_function.this["usuarios_actualizar"].invoke_arn
+  lambda_function_name = aws_lambda_function.this["usuarios_actualizar"].function_name
+  api_execution_arn    = aws_api_gateway_rest_api.cloudshop.execution_arn
+  request_parameters   = { "method.request.path.id" = true }
+}
+
+module "usuarios_delete" {
+  source              = "./modules/api_method"
+  rest_api_id          = aws_api_gateway_rest_api.cloudshop.id
+  resource_id          = aws_api_gateway_resource.usuarios_id.id
+  http_method          = "DELETE"
+  authorizer_id        = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn    = aws_lambda_function.this["usuarios_desactivar"].invoke_arn
+  lambda_function_name = aws_lambda_function.this["usuarios_desactivar"].function_name
+  api_execution_arn    = aws_api_gateway_rest_api.cloudshop.execution_arn
+  request_parameters   = { "method.request.path.id" = true }
+}
+
+module "usuarios_cors" {
+  source      = "./modules/cors_options"
+  rest_api_id = aws_api_gateway_rest_api.cloudshop.id
+  resource_id = aws_api_gateway_resource.usuarios.id
+}
+
+module "usuarios_id_cors" {
+  source      = "./modules/cors_options"
+  rest_api_id = aws_api_gateway_rest_api.cloudshop.id
+  resource_id = aws_api_gateway_resource.usuarios_id.id
+}
+
+# --- Recursos /productos y /productos/{id} ---
+
+resource "aws_api_gateway_resource" "productos" {
+  rest_api_id = aws_api_gateway_rest_api.cloudshop.id
+  parent_id   = aws_api_gateway_rest_api.cloudshop.root_resource_id
+  path_part   = "productos"
+}
+
+resource "aws_api_gateway_resource" "productos_id" {
+  rest_api_id = aws_api_gateway_rest_api.cloudshop.id
+  parent_id   = aws_api_gateway_resource.productos.id
+  path_part   = "{id}"
+}
+
+module "productos_post" {
+  source                = "./modules/api_method"
+  rest_api_id            = aws_api_gateway_rest_api.cloudshop.id
+  resource_id            = aws_api_gateway_resource.productos.id
+  http_method            = "POST"
+  authorizer_id          = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn      = aws_lambda_function.this["productos_crear"].invoke_arn
+  lambda_function_name   = aws_lambda_function.this["productos_crear"].function_name
+  api_execution_arn      = aws_api_gateway_rest_api.cloudshop.execution_arn
+}
+
+module "productos_get_all" {
+  source                = "./modules/api_method"
+  rest_api_id            = aws_api_gateway_rest_api.cloudshop.id
+  resource_id            = aws_api_gateway_resource.productos.id
+  http_method            = "GET"
+  authorizer_id          = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn      = aws_lambda_function.this["productos_listar"].invoke_arn
+  lambda_function_name   = aws_lambda_function.this["productos_listar"].function_name
+  api_execution_arn      = aws_api_gateway_rest_api.cloudshop.execution_arn
+}
+
+module "productos_get_one" {
+  source              = "./modules/api_method"
+  rest_api_id          = aws_api_gateway_rest_api.cloudshop.id
+  resource_id          = aws_api_gateway_resource.productos_id.id
+  http_method          = "GET"
+  authorizer_id        = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn    = aws_lambda_function.this["productos_obtener"].invoke_arn
+  lambda_function_name = aws_lambda_function.this["productos_obtener"].function_name
+  api_execution_arn    = aws_api_gateway_rest_api.cloudshop.execution_arn
+  request_parameters   = { "method.request.path.id" = true }
+}
+
+module "productos_patch" {
+  source              = "./modules/api_method"
+  rest_api_id          = aws_api_gateway_rest_api.cloudshop.id
+  resource_id          = aws_api_gateway_resource.productos_id.id
+  http_method          = "PATCH"
+  authorizer_id        = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn    = aws_lambda_function.this["productos_actualizar"].invoke_arn
+  lambda_function_name = aws_lambda_function.this["productos_actualizar"].function_name
+  api_execution_arn    = aws_api_gateway_rest_api.cloudshop.execution_arn
+  request_parameters   = { "method.request.path.id" = true }
+}
+
+module "productos_delete" {
+  source              = "./modules/api_method"
+  rest_api_id          = aws_api_gateway_rest_api.cloudshop.id
+  resource_id          = aws_api_gateway_resource.productos_id.id
+  http_method          = "DELETE"
+  authorizer_id        = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn    = aws_lambda_function.this["productos_eliminar"].invoke_arn
+  lambda_function_name = aws_lambda_function.this["productos_eliminar"].function_name
+  api_execution_arn    = aws_api_gateway_rest_api.cloudshop.execution_arn
+  request_parameters   = { "method.request.path.id" = true }
+}
+
+module "productos_cors" {
+  source      = "./modules/cors_options"
+  rest_api_id = aws_api_gateway_rest_api.cloudshop.id
+  resource_id = aws_api_gateway_resource.productos.id
+}
+
+module "productos_id_cors" {
+  source      = "./modules/cors_options"
+  rest_api_id = aws_api_gateway_rest_api.cloudshop.id
+  resource_id = aws_api_gateway_resource.productos_id.id
+}
+
+# --- Deployment + Stage ---
+# El trigger fuerza un nuevo deployment cada vez que cambia algun metodo o
+# recurso; sin esto Terraform no vuelve a desplegar la API en cada apply.
+resource "aws_api_gateway_deployment" "cloudshop" {
+  rest_api_id = aws_api_gateway_rest_api.cloudshop.id
+
+  triggers = {
+    redeployment = sha1(jsonencode([
+      aws_api_gateway_resource.usuarios.id,
+      aws_api_gateway_resource.usuarios_id.id,
+      module.usuarios_post.method_id,
+      module.usuarios_get_all.method_id,
+      module.usuarios_get_one.method_id,
+      module.usuarios_patch.method_id,
+      module.usuarios_delete.method_id,
+      module.usuarios_cors.rest_api_id,
+      aws_api_gateway_resource.productos.id,
+      aws_api_gateway_resource.productos_id.id,
+      module.productos_post.method_id,
+      module.productos_get_all.method_id,
+      module.productos_get_one.method_id,
+      module.productos_patch.method_id,
+      module.productos_delete.method_id,
+      module.productos_cors.rest_api_id,
+    ]))
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_cloudwatch_log_group" "api_gateway" {
+  name              = "/aws/apigateway/${local.name_prefix}"
+  retention_in_days = 14
+  tags              = local.common_tags
+}
+
+resource "aws_api_gateway_stage" "cloudshop" {
+  deployment_id = aws_api_gateway_deployment.cloudshop.id
+  rest_api_id   = aws_api_gateway_rest_api.cloudshop.id
+  stage_name    = var.environment
+
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api_gateway.arn
+    format = jsonencode({
+      requestId    = "$context.requestId"
+      ip           = "$context.identity.sourceIp"
+      caller       = "$context.identity.caller"
+      user         = "$context.identity.user"
+      requestTime  = "$context.requestTime"
+      httpMethod   = "$context.httpMethod"
+      resourcePath = "$context.resourcePath"
+      status       = "$context.status"
+      errorMessage = "$context.error.message"
+    })
+  }
+
+  tags = local.common_tags
+}
+
+# Metricas detalladas de API Gateway para CloudWatch (seccion 8 del enunciado).
+resource "aws_api_gateway_method_settings" "cloudshop" {
+  rest_api_id = aws_api_gateway_rest_api.cloudshop.id
+  stage_name  = aws_api_gateway_stage.cloudshop.stage_name
+  method_path = "*/*"
+
+  settings {
+    metrics_enabled    = true
+    logging_level      = "INFO"
+    data_trace_enabled = false
+  }
+}
