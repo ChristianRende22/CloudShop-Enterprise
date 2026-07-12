@@ -186,6 +186,90 @@ module "productos_id_cors" {
   resource_id = aws_api_gateway_resource.productos_id.id
 }
 
+# --- Recursos /tiendas y /tiendas/{id} ---
+
+resource "aws_api_gateway_resource" "tiendas" {
+  rest_api_id = aws_api_gateway_rest_api.cloudshop.id
+  parent_id   = aws_api_gateway_rest_api.cloudshop.root_resource_id
+  path_part   = "tiendas"
+}
+
+resource "aws_api_gateway_resource" "tiendas_id" {
+  rest_api_id = aws_api_gateway_rest_api.cloudshop.id
+  parent_id   = aws_api_gateway_resource.tiendas.id
+  path_part   = "{id}"
+}
+
+module "tiendas_post" {
+  source                = "./modules/api_method"
+  rest_api_id            = aws_api_gateway_rest_api.cloudshop.id
+  resource_id            = aws_api_gateway_resource.tiendas.id
+  http_method            = "POST"
+  authorizer_id          = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn      = aws_lambda_function.this["tiendas_crear"].invoke_arn
+  lambda_function_name   = aws_lambda_function.this["tiendas_crear"].function_name
+  api_execution_arn      = aws_api_gateway_rest_api.cloudshop.execution_arn
+}
+
+module "tiendas_get_all" {
+  source                = "./modules/api_method"
+  rest_api_id            = aws_api_gateway_rest_api.cloudshop.id
+  resource_id            = aws_api_gateway_resource.tiendas.id
+  http_method            = "GET"
+  authorizer_id          = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn      = aws_lambda_function.this["tiendas_listar"].invoke_arn
+  lambda_function_name   = aws_lambda_function.this["tiendas_listar"].function_name
+  api_execution_arn      = aws_api_gateway_rest_api.cloudshop.execution_arn
+}
+
+module "tiendas_get_one" {
+  source              = "./modules/api_method"
+  rest_api_id          = aws_api_gateway_rest_api.cloudshop.id
+  resource_id          = aws_api_gateway_resource.tiendas_id.id
+  http_method          = "GET"
+  authorizer_id        = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn    = aws_lambda_function.this["tiendas_obtener"].invoke_arn
+  lambda_function_name = aws_lambda_function.this["tiendas_obtener"].function_name
+  api_execution_arn    = aws_api_gateway_rest_api.cloudshop.execution_arn
+  request_parameters   = { "method.request.path.id" = true }
+}
+
+module "tiendas_patch" {
+  source              = "./modules/api_method"
+  rest_api_id          = aws_api_gateway_rest_api.cloudshop.id
+  resource_id          = aws_api_gateway_resource.tiendas_id.id
+  http_method          = "PATCH"
+  authorizer_id        = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn    = aws_lambda_function.this["tiendas_actualizar"].invoke_arn
+  lambda_function_name = aws_lambda_function.this["tiendas_actualizar"].function_name
+  api_execution_arn    = aws_api_gateway_rest_api.cloudshop.execution_arn
+  request_parameters   = { "method.request.path.id" = true }
+}
+
+module "tiendas_delete" {
+  source              = "./modules/api_method"
+  rest_api_id          = aws_api_gateway_rest_api.cloudshop.id
+  resource_id          = aws_api_gateway_resource.tiendas_id.id
+  http_method          = "DELETE"
+  authorizer_id        = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn    = aws_lambda_function.this["tiendas_desactivar"].invoke_arn
+  lambda_function_name = aws_lambda_function.this["tiendas_desactivar"].function_name
+  api_execution_arn    = aws_api_gateway_rest_api.cloudshop.execution_arn
+  request_parameters   = { "method.request.path.id" = true }
+}
+
+module "tiendas_cors" {
+  source      = "./modules/cors_options"
+  rest_api_id = aws_api_gateway_rest_api.cloudshop.id
+  resource_id = aws_api_gateway_resource.tiendas.id
+}
+
+module "tiendas_id_cors" {
+  source      = "./modules/cors_options"
+  rest_api_id = aws_api_gateway_rest_api.cloudshop.id
+  resource_id = aws_api_gateway_resource.tiendas_id.id
+}
+
 # --- Deployment + Stage ---
 # El trigger fuerza un nuevo deployment cada vez que cambia algun metodo o
 # recurso; sin esto Terraform no vuelve a desplegar la API en cada apply.
@@ -210,6 +294,14 @@ resource "aws_api_gateway_deployment" "cloudshop" {
       module.productos_patch.method_id,
       module.productos_delete.method_id,
       module.productos_cors.rest_api_id,
+      aws_api_gateway_resource.tiendas.id,
+      aws_api_gateway_resource.tiendas_id.id,
+      module.tiendas_post.method_id,
+      module.tiendas_get_all.method_id,
+      module.tiendas_get_one.method_id,
+      module.tiendas_patch.method_id,
+      module.tiendas_delete.method_id,
+      module.tiendas_cors.rest_api_id,
     ]))
   }
 

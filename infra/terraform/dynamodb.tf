@@ -61,6 +61,23 @@ resource "aws_dynamodb_table" "productos" {
   tags = local.common_tags
 }
 
-# NOTA: las tablas de Tiendas, Carrito y Pedidos se agregan en este mismo
-# archivo cuando se implementen esos modulos (ver README para el estado
-# actual del proyecto).
+# Modulo 3 - Tiendas
+resource "aws_dynamodb_table" "tiendas" {
+  name         = "${local.name_prefix}-tiendas"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "tienda_id"
+
+  attribute {
+    name = "tienda_id"
+    type = "S"
+  }
+
+  point_in_time_recovery {
+    enabled = true
+  }
+
+  tags = local.common_tags
+}
+
+# NOTA: las tablas de Carrito y Pedidos se agregan en este mismo archivo
+# cuando se implementen esos modulos (ver README para el estado actual).

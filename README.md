@@ -10,7 +10,7 @@ cloudshop-enterprise/
 │   ├── common/          # capa compartida: auth, respuestas HTTP, auditoría, eventos, validación, acceso a DynamoDB
 │   ├── usuarios/        # Módulo 1
 │   ├── productos/       # Módulo 2 (listo)
-│   ├── tiendas/         # Módulo 3 (pendiente)
+│   ├── tiendas/         # Módulo 3 (listo)
 │   ├── carrito/         # Módulo 4 (pendiente)
 │   ├── pedidos/         # Módulo 5 (pendiente)
 │   ├── notificaciones/  # consumer de eventos -> SES (pendiente)
@@ -31,7 +31,8 @@ cloudshop-enterprise/
 - [x] Módulo 1 — Usuarios (CRUD + roles + auditoría)
 - [x] Terraform base: provider, IAM (mínimo privilegio), DynamoDB usuarios/auditoría, API Gateway + Cognito Authorizer, Lambdas de usuarios, EventBridge bus
 - [x] Módulo 2 — Productos (CRUD + roles + auditoría + GSI tienda_id)
-- [ ] Módulos 3-6 (Tiendas, Carrito, Pedidos+SES, Dashboard)
+- [x] Módulo 3 — Tiendas (CRUD + borrado lógico + roles)
+- [ ] Módulos 4-6 (Carrito, Pedidos+SES, Dashboard)
 - [ ] CloudFront + WAF + S3 frontend
 - [ ] SES + consumer de notificaciones
 - [ ] CloudWatch alarms

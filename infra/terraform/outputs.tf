@@ -11,6 +11,10 @@ output "productos_table_name" {
   value = aws_dynamodb_table.productos.name
 }
 
+output "tiendas_table_name" {
+  value = aws_dynamodb_table.tiendas.name
+}
+
 output "auditoria_table_name" {
   value = aws_dynamodb_table.auditoria.name
 }

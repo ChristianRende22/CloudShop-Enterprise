@@ -1,5 +1,5 @@
 # Empaqueta TODO backend/ (common/ + cada modulo) en un solo zip, asi cada
-# Lambda puede hacer `from common.x import y` y `from productos import handler`
+# Lambda puede hacer `from common.x import y` y `from tiendas import handler`
 # sin duplicar codigo. Terraform re-empaqueta automaticamente cuando cambia
 # cualquier archivo fuente (source_code_hash).
 data "archive_file" "backend" {
@@ -9,9 +9,9 @@ data "archive_file" "backend" {
   excludes    = ["__pycache__", ".pytest_cache", "test_handler.py", "requirements.txt"]
 }
 
-# Un entry por endpoint. Se va ampliando conforme se agregan Tiendas, Carrito,
-# Pedidos y Dashboard (mismo patron: una Lambda = una operacion CRUD,
-# "funciones enfocadas" de Clase 22).
+# Un entry por endpoint. Se va ampliando conforme se agregan Carrito, Pedidos
+# y Dashboard (mismo patron: una Lambda = una operacion CRUD, "funciones
+# enfocadas" de Clase 22).
 locals {
   lambda_functions = {
     usuarios_crear = {
@@ -44,6 +44,21 @@ locals {
     productos_eliminar = {
       handler = "productos.handler.eliminar"
     }
+    tiendas_crear = {
+      handler = "tiendas.handler.crear"
+    }
+    tiendas_listar = {
+      handler = "tiendas.handler.listar"
+    }
+    tiendas_obtener = {
+      handler = "tiendas.handler.obtener"
+    }
+    tiendas_actualizar = {
+      handler = "tiendas.handler.actualizar"
+    }
+    tiendas_desactivar = {
+      handler = "tiendas.handler.desactivar"
+    }
   }
 }
 
@@ -63,6 +78,7 @@ resource "aws_lambda_function" "this" {
     variables = {
       USUARIOS_TABLE  = aws_dynamodb_table.usuarios.name
       PRODUCTOS_TABLE = aws_dynamodb_table.productos.name
+      TIENDAS_TABLE   = aws_dynamodb_table.tiendas.name
       AUDIT_TABLE     = aws_dynamodb_table.auditoria.name
       EVENT_BUS_NAME  = aws_cloudwatch_event_bus.cloudshop.name
       ROLE_CLAIM_KEY  = "custom:role"
