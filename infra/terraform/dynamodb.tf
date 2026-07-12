@@ -102,5 +102,33 @@ resource "aws_dynamodb_table" "carrito" {
   tags = local.common_tags
 }
 
-# NOTA: la tabla de Pedidos se agrega en este mismo archivo cuando se
-# implemente ese modulo (ver README para el estado actual).
+# Modulo 5 - Pedidos
+# GSI cliente_id-index: permite "Cliente ve solo sus pedidos" y "clientes con
+# mas compras" (Dashboard) con Query en vez de Scan.
+resource "aws_dynamodb_table" "pedidos" {
+  name         = "${local.name_prefix}-pedidos"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "pedido_id"
+
+  attribute {
+    name = "pedido_id"
+    type = "S"
+  }
+
+  attribute {
+    name = "cliente_id"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name            = "cliente_id-index"
+    hash_key        = "cliente_id"
+    projection_type = "ALL"
+  }
+
+  point_in_time_recovery {
+    enabled = true
+  }
+
+  tags = local.common_tags
+}

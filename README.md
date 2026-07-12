@@ -12,8 +12,8 @@ cloudshop-enterprise/
 │   ├── productos/       # Módulo 2 (listo)
 │   ├── tiendas/         # Módulo 3 (listo)
 │   ├── carrito/         # Módulo 4 (listo)
-│   ├── pedidos/         # Módulo 5 (pendiente)
-│   ├── notificaciones/  # consumer de eventos -> SES (pendiente)
+│   ├── pedidos/         # Módulo 5 (listo)
+│   ├── notificaciones/  # consumer de eventos -> SES (listo)
 │   └── dashboard/       # Módulo 6 (pendiente)
 ├── infra/terraform/
 │   ├── modules/
@@ -33,9 +33,10 @@ cloudshop-enterprise/
 - [x] Módulo 2 — Productos (CRUD + roles + auditoría + GSI tienda_id)
 - [x] Módulo 3 — Tiendas (CRUD + borrado lógico + roles)
 - [x] Módulo 4 — Carrito (agregar/modificar/eliminar/vaciar, propio del usuario)
-- [ ] Módulos 5-6 (Pedidos+SES, Dashboard)
+- [x] Módulo 5 — Pedidos (inventario atómico + rollback, EventBridge, auditoría, SES)
+- [ ] Módulo 6 (Dashboard)
 - [ ] CloudFront + WAF + S3 frontend
-- [ ] SES + consumer de notificaciones
+- [x] SES + consumer de notificaciones
 - [ ] CloudWatch alarms
 - [ ] Documento técnico completo
 

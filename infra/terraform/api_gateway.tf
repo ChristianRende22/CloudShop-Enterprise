@@ -355,6 +355,90 @@ module "carrito_id_cors" {
   resource_id = aws_api_gateway_resource.carrito_id.id
 }
 
+# --- Recursos /pedidos y /pedidos/{id} ---
+
+resource "aws_api_gateway_resource" "pedidos" {
+  rest_api_id = aws_api_gateway_rest_api.cloudshop.id
+  parent_id   = aws_api_gateway_rest_api.cloudshop.root_resource_id
+  path_part   = "pedidos"
+}
+
+resource "aws_api_gateway_resource" "pedidos_id" {
+  rest_api_id = aws_api_gateway_rest_api.cloudshop.id
+  parent_id   = aws_api_gateway_resource.pedidos.id
+  path_part   = "{id}"
+}
+
+module "pedidos_post" {
+  source                = "./modules/api_method"
+  rest_api_id            = aws_api_gateway_rest_api.cloudshop.id
+  resource_id            = aws_api_gateway_resource.pedidos.id
+  http_method            = "POST"
+  authorizer_id          = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn      = aws_lambda_function.this["pedidos_crear"].invoke_arn
+  lambda_function_name   = aws_lambda_function.this["pedidos_crear"].function_name
+  api_execution_arn      = aws_api_gateway_rest_api.cloudshop.execution_arn
+}
+
+module "pedidos_get_all" {
+  source                = "./modules/api_method"
+  rest_api_id            = aws_api_gateway_rest_api.cloudshop.id
+  resource_id            = aws_api_gateway_resource.pedidos.id
+  http_method            = "GET"
+  authorizer_id          = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn      = aws_lambda_function.this["pedidos_listar"].invoke_arn
+  lambda_function_name   = aws_lambda_function.this["pedidos_listar"].function_name
+  api_execution_arn      = aws_api_gateway_rest_api.cloudshop.execution_arn
+}
+
+module "pedidos_get_one" {
+  source              = "./modules/api_method"
+  rest_api_id          = aws_api_gateway_rest_api.cloudshop.id
+  resource_id          = aws_api_gateway_resource.pedidos_id.id
+  http_method          = "GET"
+  authorizer_id        = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn    = aws_lambda_function.this["pedidos_obtener"].invoke_arn
+  lambda_function_name = aws_lambda_function.this["pedidos_obtener"].function_name
+  api_execution_arn    = aws_api_gateway_rest_api.cloudshop.execution_arn
+  request_parameters   = { "method.request.path.id" = true }
+}
+
+module "pedidos_patch" {
+  source              = "./modules/api_method"
+  rest_api_id          = aws_api_gateway_rest_api.cloudshop.id
+  resource_id          = aws_api_gateway_resource.pedidos_id.id
+  http_method          = "PATCH"
+  authorizer_id        = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn    = aws_lambda_function.this["pedidos_actualizar"].invoke_arn
+  lambda_function_name = aws_lambda_function.this["pedidos_actualizar"].function_name
+  api_execution_arn    = aws_api_gateway_rest_api.cloudshop.execution_arn
+  request_parameters   = { "method.request.path.id" = true }
+}
+
+module "pedidos_delete" {
+  source              = "./modules/api_method"
+  rest_api_id          = aws_api_gateway_rest_api.cloudshop.id
+  resource_id          = aws_api_gateway_resource.pedidos_id.id
+  http_method          = "DELETE"
+  authorizer_id        = aws_api_gateway_authorizer.cognito.id
+  lambda_invoke_arn    = aws_lambda_function.this["pedidos_cancelar"].invoke_arn
+  lambda_function_name = aws_lambda_function.this["pedidos_cancelar"].function_name
+  api_execution_arn    = aws_api_gateway_rest_api.cloudshop.execution_arn
+  request_parameters   = { "method.request.path.id" = true }
+}
+
+module "pedidos_cors" {
+  source      = "./modules/cors_options"
+  rest_api_id = aws_api_gateway_rest_api.cloudshop.id
+  resource_id = aws_api_gateway_resource.pedidos.id
+}
+
+module "pedidos_id_cors" {
+  source      = "./modules/cors_options"
+  rest_api_id = aws_api_gateway_rest_api.cloudshop.id
+  resource_id = aws_api_gateway_resource.pedidos_id.id
+}
+
 # --- Deployment + Stage ---
 # El trigger fuerza un nuevo deployment cada vez que cambia algun metodo o
 # recurso; sin esto Terraform no vuelve a desplegar la API en cada apply.
@@ -395,6 +479,14 @@ resource "aws_api_gateway_deployment" "cloudshop" {
       module.carrito_patch.method_id,
       module.carrito_delete_one.method_id,
       module.carrito_cors.rest_api_id,
+      aws_api_gateway_resource.pedidos.id,
+      aws_api_gateway_resource.pedidos_id.id,
+      module.pedidos_post.method_id,
+      module.pedidos_get_all.method_id,
+      module.pedidos_get_one.method_id,
+      module.pedidos_patch.method_id,
+      module.pedidos_delete.method_id,
+      module.pedidos_cors.rest_api_id,
     ]))
   }
 

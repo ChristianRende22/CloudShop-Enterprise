@@ -74,6 +74,21 @@ locals {
     carrito_vaciar = {
       handler = "carrito.handler.vaciar"
     }
+    pedidos_crear = {
+      handler = "pedidos.handler.crear"
+    }
+    pedidos_listar = {
+      handler = "pedidos.handler.listar"
+    }
+    pedidos_obtener = {
+      handler = "pedidos.handler.obtener"
+    }
+    pedidos_actualizar = {
+      handler = "pedidos.handler.actualizar"
+    }
+    pedidos_cancelar = {
+      handler = "pedidos.handler.cancelar"
+    }
   }
 }
 
@@ -95,6 +110,7 @@ resource "aws_lambda_function" "this" {
       PRODUCTOS_TABLE = aws_dynamodb_table.productos.name
       TIENDAS_TABLE   = aws_dynamodb_table.tiendas.name
       CARRITO_TABLE   = aws_dynamodb_table.carrito.name
+      PEDIDOS_TABLE   = aws_dynamodb_table.pedidos.name
       AUDIT_TABLE     = aws_dynamodb_table.auditoria.name
       EVENT_BUS_NAME  = aws_cloudwatch_event_bus.cloudshop.name
       ROLE_CLAIM_KEY  = "custom:role"
@@ -108,6 +124,35 @@ resource "aws_cloudwatch_log_group" "lambda" {
   for_each = local.lambda_functions
 
   name              = "/aws/lambda/${local.name_prefix}-${each.key}"
+  retention_in_days = 14
+  tags              = local.common_tags
+}
+
+
+# Lambda de notificaciones: NO usa el rol compartido (lambda_exec) sino uno
+# propio (notificaciones_exec) que es el UNICO con permiso ses:SendEmail.
+# Se dispara por la regla de EventBridge en eventbridge.tf, no por API Gateway.
+resource "aws_lambda_function" "notificaciones" {
+  function_name    = "${local.name_prefix}-notificaciones-enviar"
+  role             = aws_iam_role.notificaciones_exec.arn
+  handler          = "notificaciones.handler.enviar_notificacion"
+  runtime          = "python3.12"
+  filename         = data.archive_file.backend.output_path
+  source_code_hash = data.archive_file.backend.output_base64sha256
+  timeout          = 10
+  memory_size      = 128
+
+  environment {
+    variables = {
+      SES_SENDER_EMAIL = var.ses_sender_email
+    }
+  }
+
+  tags = local.common_tags
+}
+
+resource "aws_cloudwatch_log_group" "notificaciones" {
+  name              = "/aws/lambda/${local.name_prefix}-notificaciones-enviar"
   retention_in_days = 14
   tags              = local.common_tags
 }

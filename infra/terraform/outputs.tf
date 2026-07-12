@@ -19,6 +19,14 @@ output "carrito_table_name" {
   value = aws_dynamodb_table.carrito.name
 }
 
+output "pedidos_table_name" {
+  value = aws_dynamodb_table.pedidos.name
+}
+
+output "notificaciones_lambda_name" {
+  value = aws_lambda_function.notificaciones.function_name
+}
+
 output "auditoria_table_name" {
   value = aws_dynamodb_table.auditoria.name
 }
