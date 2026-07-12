@@ -27,6 +27,27 @@ output "notificaciones_lambda_name" {
   value = aws_lambda_function.notificaciones.function_name
 }
 
+output "cloudfront_domain_name" {
+  description = "Dominio publico del frontend (https://<esto>)"
+  value       = aws_cloudfront_distribution.frontend.domain_name
+}
+
+output "frontend_bucket_name" {
+  value = aws_s3_bucket.frontend.bucket
+}
+
+output "waf_web_acl_arn" {
+  value = aws_wafv2_web_acl.cloudshop.arn
+}
+
+output "cloudwatch_dashboard_url" {
+  value = "https://${var.aws_region}.console.aws.amazon.com/cloudwatch/home?region=${var.aws_region}#dashboards:name=${aws_cloudwatch_dashboard.cloudshop.dashboard_name}"
+}
+
+output "sns_alarmas_topic_arn" {
+  value = aws_sns_topic.alarmas.arn
+}
+
 output "auditoria_table_name" {
   value = aws_dynamodb_table.auditoria.name
 }
