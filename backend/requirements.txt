@@ -1,0 +1,3 @@
+# boto3/botocore ya vienen incluidos en el runtime de AWS Lambda (python3.12).
+# Este archivo se deja como referencia para desarrollo/test local:
+boto3>=1.34
