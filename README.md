@@ -20,7 +20,8 @@ cloudshop-enterprise/
 │   │   ├── api_method/      # method + integration + permission por endpoint
 │   │   └── cors_options/    # OPTIONS + mock integration para CORS
 │   ├── provider.tf, variables.tf, locals.tf, outputs.tf
-│   ├── dynamodb.tf, iam.tf, lambda.tf, api_gateway.tf, eventbridge.tf
+│   ├── dynamodb.tf, iam.tf, lambda.tf, api_gateway.tf, eventbridge.tf, ses.tf
+│   ├── s3_frontend.tf, cloudfront.tf, waf.tf, cloudwatch.tf
 │   └── terraform.tfvars.example
 └── docs/                 # documento técnico (pendiente)
 ```
@@ -35,9 +36,9 @@ cloudshop-enterprise/
 - [x] Módulo 4 — Carrito (agregar/modificar/eliminar/vaciar, propio del usuario)
 - [x] Módulo 5 — Pedidos (inventario atómico + rollback, EventBridge, auditoría, SES)
 - [x] Módulo 6 — Dashboard Ejecutivo (agregación sobre Pedidos + Productos, solo Administrador)
-- [ ] CloudFront + WAF + S3 frontend
+- [x] CloudFront + WAF + S3 frontend (OAC, fallback SPA, managed rules + rate limit)
 - [x] SES + consumer de notificaciones
-- [ ] CloudWatch alarms
+- [x] CloudWatch (alarmas por Lambda/API Gateway + SNS + dashboard operativo)
 - [ ] Documento técnico completo
 
 ## Cómo desplegar (una vez completo)
