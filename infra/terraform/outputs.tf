@@ -59,3 +59,17 @@ output "event_bus_name" {
 output "lambda_exec_role_arn" {
   value = aws_iam_role.lambda_exec.arn
 }
+
+output "cognito_user_pool_id" {
+  description = "Para VITE_COGNITO_USER_POOL_ID en frontend/.env.production"
+  value       = aws_cognito_user_pool.cloudshop.id
+}
+
+output "cognito_client_id" {
+  description = "Para VITE_COGNITO_CLIENT_ID en frontend/.env.production"
+  value       = aws_cognito_user_pool_client.frontend.id
+}
+
+output "cognito_region" {
+  value = var.aws_region
+}

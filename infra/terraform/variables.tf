@@ -16,11 +16,6 @@ variable "environment" {
   default     = "dev"
 }
 
-variable "cognito_user_pool_arn" {
-  description = "ARN del User Pool de Cognito usado por el Authorizer de API Gateway. Debe exponer el atributo custom 'custom:role' con valores Administrador|Operador|Cliente."
-  type        = string
-}
-
 variable "ses_sender_email" {
   description = "Correo verificado en SES que enviará las notificaciones de pedidos (sandbox de SES requiere verificar también los destinatarios)"
   type        = string
