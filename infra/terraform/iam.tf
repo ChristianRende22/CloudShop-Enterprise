@@ -33,6 +33,8 @@ data "aws_iam_policy_document" "lambda_dynamodb" {
       "dynamodb:DeleteItem",
       "dynamodb:Query",
       "dynamodb:Scan",
+      "dynamodb:BatchGetItem",
+      "dynamodb:BatchWriteItem",
     ]
     resources = [
       aws_dynamodb_table.usuarios.arn,
