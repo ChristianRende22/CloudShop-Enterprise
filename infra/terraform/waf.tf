@@ -4,7 +4,7 @@
 resource "aws_wafv2_web_acl" "cloudshop" {
   provider    = aws.us_east_1
   name        = "${local.name_prefix}-waf"
-  description = "WAF para el frontend de CloudShop Enterprise (CloudFront)"
+  description = "WAF para el frontend de CloudShop Enterprise - CloudFront"
   scope       = "CLOUDFRONT"
 
   default_action {
