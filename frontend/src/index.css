@@ -354,3 +354,50 @@ tbody tr:hover td { box-shadow: 0 4px 14px rgba(108, 92, 231, 0.08); }
   color: var(--muted);
   margin-bottom: 6px;
 }
+
+/* ---------------- Responsive (movil) ---------------- */
+
+@media (max-width: 720px) {
+  .navbar {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 56px;
+    padding: 10px 14px;
+    gap: 4px 6px;
+  }
+
+  .navbar a { padding: 7px 11px; font-size: 13px; }
+
+  .navbar .who {
+    max-width: 48vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .page { margin: 20px auto; padding: 0 16px; }
+
+  .auth-card {
+    max-width: none;
+    margin: 32px 16px;
+    padding: 28px 22px 24px;
+  }
+
+  /* evita el zoom automatico de iOS al enfocar inputs */
+  input, select { font-size: 16px; }
+
+  /* las tablas hacen scroll horizontal dentro de la pagina,
+     en vez de desbordar todo el layout */
+  table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  td, th { white-space: nowrap; }
+
+  .grid-form { grid-template-columns: 1fr; }
+  .dash-cols { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .stat { padding: 14px 16px; }
+  .stat-value { font-size: 22px; }
+}
