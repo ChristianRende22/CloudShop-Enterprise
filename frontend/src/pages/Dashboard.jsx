@@ -1,12 +1,19 @@
 import { useEffect, useState } from "react";
 import { obtenerDashboard } from "../services/dashboard";
+import { listarTiendas } from "../services/tiendas";
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
+  const [tiendasPorId, setTiendasPorId] = useState({});
   const [error, setError] = useState("");
 
   useEffect(() => {
-    obtenerDashboard().then(setData).catch((err) => setError(err.message));
+    Promise.all([obtenerDashboard(), listarTiendas()])
+      .then(([dash, tiendas]) => {
+        setData(dash);
+        setTiendasPorId(Object.fromEntries(tiendas.items.map((t) => [t.tienda_id, t.nombre])));
+      })
+      .catch((err) => setError(err.message));
   }, []);
 
   if (error) return <p className="error">{error}</p>;
@@ -29,7 +36,9 @@ export default function Dashboard() {
           <table>
             <thead><tr><th>Tienda</th><th>Total</th></tr></thead>
             <tbody>
-              {data.ventas_por_tienda.map((v) => <tr key={v.tienda_id}><td>{v.tienda_id}</td><td>${Number(v.total).toFixed(2)}</td></tr>)}
+              {data.ventas_por_tienda.map((v) => (
+                <tr key={v.tienda_id}><td>{tiendasPorId[v.tienda_id] || v.tienda_id}</td><td>${Number(v.total).toFixed(2)}</td></tr>
+              ))}
             </tbody>
           </table>
         </div>
@@ -47,7 +56,7 @@ export default function Dashboard() {
           <table>
             <thead><tr><th>Cliente</th><th>Comprado</th></tr></thead>
             <tbody>
-              {data.clientes_top.map((c) => <tr key={c.cliente_id}><td>{c.cliente_username}</td><td>${Number(c.total_comprado).toFixed(2)}</td></tr>)}
+              {data.clientes_top.map((c) => <tr key={c.cliente_id}><td>{c.cliente_email}</td><td>${Number(c.total_comprado).toFixed(2)}</td></tr>)}
             </tbody>
           </table>
         </div>
