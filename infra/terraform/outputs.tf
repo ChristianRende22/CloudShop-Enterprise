@@ -32,6 +32,11 @@ output "cloudfront_domain_name" {
   value       = aws_cloudfront_distribution.frontend.domain_name
 }
 
+output "cloudfront_distribution_id" {
+  description = "Para invalidar cache tras cada deploy: aws cloudfront create-invalidation --distribution-id <esto> --paths '/*'"
+  value       = aws_cloudfront_distribution.frontend.id
+}
+
 output "frontend_bucket_name" {
   value = aws_s3_bucket.frontend.bucket
 }
