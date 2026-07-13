@@ -57,18 +57,18 @@ def aws_local():
         productos.put_item(Item={"producto_id": "p2", "nombre": "Teclado", "inventario_disponible": 10})
 
         pedidos.put_item(Item={
-            "pedido_id": "ped-1", "cliente_id": "cli-A", "cliente_username": "ana",
+            "pedido_id": "ped-1", "cliente_id": "cli-A", "cliente_email": "ana@correo.com",
             "estado": "Entregado", "total": Decimal("100"),
             "items": [{"producto_id": "p1", "nombre": "Mouse", "tienda_id": "t1", "cantidad": 2, "subtotal": Decimal("40")},
                       {"producto_id": "p2", "nombre": "Teclado", "tienda_id": "t1", "cantidad": 1, "subtotal": Decimal("60")}],
         })
         pedidos.put_item(Item={
-            "pedido_id": "ped-2", "cliente_id": "cli-A", "cliente_username": "ana",
+            "pedido_id": "ped-2", "cliente_id": "cli-A", "cliente_email": "ana@correo.com",
             "estado": "Pendiente", "total": Decimal("40"),
             "items": [{"producto_id": "p1", "nombre": "Mouse", "tienda_id": "t1", "cantidad": 1, "subtotal": Decimal("40")}],
         })
         pedidos.put_item(Item={
-            "pedido_id": "ped-3", "cliente_id": "cli-B", "cliente_username": "beto",
+            "pedido_id": "ped-3", "cliente_id": "cli-B", "cliente_email": "beto@correo.com",
             "estado": "Cancelado", "total": Decimal("500"),
             "items": [{"producto_id": "p2", "nombre": "Teclado", "tienda_id": "t2", "cantidad": 5, "subtotal": Decimal("500")}],
         })
@@ -126,6 +126,7 @@ def test_clientes_top(aws_local):
 
     body = json.loads(handler.resumen(_evento(), None)["body"])
     assert body["clientes_top"][0]["cliente_id"] == "cli-A"
+    assert body["clientes_top"][0]["cliente_email"] == "ana@correo.com"
     assert body["clientes_top"][0]["total_comprado"] == 140
 
 

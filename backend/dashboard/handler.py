@@ -50,12 +50,16 @@ def resumen(event, context):
     unidades_por_producto = collections.Counter()
     nombre_producto = {}
     compras_por_cliente = collections.defaultdict(lambda: decimal.Decimal(0))
-    username_por_cliente = {}
+    # OJO: "cliente_username" viene de cognito:username, que con
+    # username_attributes=["email"] en el User Pool es un UUID autogenerado
+    # por Cognito, NO el correo. Para mostrar algo legible en el Dashboard se
+    # usa cliente_email (que si es el correo real, guardado en cada pedido).
+    email_por_cliente = {}
 
     for pedido in pedidos_validos:
         cliente_id = pedido.get("cliente_id", "desconocido")
         compras_por_cliente[cliente_id] += pedido.get("total") or 0
-        username_por_cliente[cliente_id] = pedido.get("cliente_username", cliente_id)
+        email_por_cliente[cliente_id] = pedido.get("cliente_email", cliente_id)
 
         for item in pedido.get("items", []):
             producto_id = item.get("producto_id")
@@ -79,7 +83,7 @@ def resumen(event, context):
     ]
 
     clientes_top = [
-        {"cliente_id": cid, "cliente_username": username_por_cliente.get(cid, cid), "total_comprado": monto}
+        {"cliente_id": cid, "cliente_email": email_por_cliente.get(cid, cid), "total_comprado": monto}
         for cid, monto in sorted(compras_por_cliente.items(), key=lambda kv: kv[1], reverse=True)[:TOP_N]
     ]
 
