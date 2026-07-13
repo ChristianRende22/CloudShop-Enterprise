@@ -480,6 +480,7 @@ resource "aws_api_gateway_deployment" "cloudshop" {
       module.usuarios_patch.method_id,
       module.usuarios_delete.method_id,
       module.usuarios_cors.method_id,
+      module.usuarios_id_cors.method_id,
       aws_api_gateway_resource.productos.id,
       aws_api_gateway_resource.productos_id.id,
       module.productos_post.method_id,
@@ -488,6 +489,7 @@ resource "aws_api_gateway_deployment" "cloudshop" {
       module.productos_patch.method_id,
       module.productos_delete.method_id,
       module.productos_cors.method_id,
+      module.productos_id_cors.method_id,
       aws_api_gateway_resource.tiendas.id,
       aws_api_gateway_resource.tiendas_id.id,
       module.tiendas_post.method_id,
@@ -496,6 +498,7 @@ resource "aws_api_gateway_deployment" "cloudshop" {
       module.tiendas_patch.method_id,
       module.tiendas_delete.method_id,
       module.tiendas_cors.method_id,
+      module.tiendas_id_cors.method_id,
       aws_api_gateway_resource.carrito.id,
       aws_api_gateway_resource.carrito_id.id,
       module.carrito_post.method_id,
@@ -504,6 +507,7 @@ resource "aws_api_gateway_deployment" "cloudshop" {
       module.carrito_patch.method_id,
       module.carrito_delete_one.method_id,
       module.carrito_cors.method_id,
+      module.carrito_id_cors.method_id,
       aws_api_gateway_resource.pedidos.id,
       aws_api_gateway_resource.pedidos_id.id,
       module.pedidos_post.method_id,
@@ -512,11 +516,28 @@ resource "aws_api_gateway_deployment" "cloudshop" {
       module.pedidos_patch.method_id,
       module.pedidos_delete.method_id,
       module.pedidos_cors.method_id,
+      module.pedidos_id_cors.method_id,
       aws_api_gateway_resource.dashboard.id,
       module.dashboard_get.method_id,
       module.dashboard_cors.method_id,
     ]))
   }
+
+  # depends_on explicito: aunque los outputs ya se referencian arriba en
+  # `triggers` (lo que en teoria ya crea la dependencia implicita), en la
+  # practica un `terraform apply` real fallo con "No integration defined for
+  # method" porque los modulos *_id_cors (OPTIONS de /recurso/{id}) no
+  # estaban referenciados en ningun lado y Terraform los creo en paralelo con
+  # el deployment. Este depends_on fuerza que las 37 integraciones (26
+  # metodos + 11 CORS) existan antes de crear el deployment, sin excepcion.
+  depends_on = [
+    module.usuarios_post, module.usuarios_get_all, module.usuarios_get_one, module.usuarios_patch, module.usuarios_delete, module.usuarios_cors, module.usuarios_id_cors,
+    module.productos_post, module.productos_get_all, module.productos_get_one, module.productos_patch, module.productos_delete, module.productos_cors, module.productos_id_cors,
+    module.tiendas_post, module.tiendas_get_all, module.tiendas_get_one, module.tiendas_patch, module.tiendas_delete, module.tiendas_cors, module.tiendas_id_cors,
+    module.carrito_post, module.carrito_get_all, module.carrito_delete_all, module.carrito_patch, module.carrito_delete_one, module.carrito_cors, module.carrito_id_cors,
+    module.pedidos_post, module.pedidos_get_all, module.pedidos_get_one, module.pedidos_patch, module.pedidos_delete, module.pedidos_cors, module.pedidos_id_cors,
+    module.dashboard_get, module.dashboard_cors,
+  ]
 
   lifecycle {
     create_before_destroy = true
