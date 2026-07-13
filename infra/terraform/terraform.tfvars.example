@@ -5,4 +5,6 @@ ses_sender_email = "notificaciones@tudominio.com"
 alert_email      = "tu-correo@ejemplo.com"
 
 # El User Pool de Cognito lo crea este mismo Terraform (infra/terraform/cognito.tf).
-# No hace falta ninguna variable pa
+# No hace falta ninguna variable para eso: despues de `terraform apply`,
+# `terraform output cognito_user_pool_id` y `terraform output cognito_client_id`
+# son los valores que va el frontend (frontend/.env.production).

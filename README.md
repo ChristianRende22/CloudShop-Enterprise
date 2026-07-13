@@ -61,4 +61,19 @@ El propio Terraform crea el Cognito User Pool (ya no hace falta uno externo). De
 cd ../../frontend
 cp .env.production.example .env.production
 # rellenar con:
-#   terraform -chdir=../infra/terraform output api
+#   terraform -chdir=../infra/terraform output api_invoke_url
+#   terraform -chdir=../infra/terraform output cognito_user_pool_id
+#   terraform -chdir=../infra/terraform output cognito_client_id
+npm install
+npm run build   # sube dist/ al bucket S3 del frontend (aws s3 sync dist/ s3://<frontend_bucket_name>)
+```
+
+## Convención de roles (IAM de la aplicación, vía Cognito)
+
+| Rol | Puede |
+|---|---|
+| Administrador | gestionar usuarios, tiendas, productos, ver reportes |
+| Operador | gestionar inventario, gestionar pedidos |
+| Cliente | comprar productos, ver sus propios pedidos |
+
+Cada Lambda valida rol con `common.auth.require_roles(...)` antes de tocar datos — nunca se confía solo en el frontend (mismo principio de Clase 28).
